@@ -1,13 +1,14 @@
 from pydantic import BaseModel, Field, EmailStr
+from bson import ObjectId
 
 
 class StudentModel(BaseModel):
-    student_id: str
+    id: int
     fullname: str
-    email_addr: EmailStr
+    email: EmailStr
     major: str
-    year: int = Field(..., gt=0,lt=4)
-    gpa: float = Field(..., ge=0,le=4)
+    year: int = Field(..., gt=0, lt=4)
+    gpa: float = Field(..., ge=0, le=4)
 
     class Config:
         schema_extra = {
@@ -21,9 +22,10 @@ class StudentModel(BaseModel):
             }
         }
 
+
 class UpdateStudentModel(BaseModel):
     fullname: str | None
-    email_addr: EmailStr | None
+    email: EmailStr | None
     major: str | None
     year: int | None
     gpa: float | None
@@ -39,3 +41,4 @@ class UpdateStudentModel(BaseModel):
                 "gpa": 1.6,
             }
         }
+
