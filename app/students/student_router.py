@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException
 from fastapi.encoders import jsonable_encoder
-from .student_model import *
+from app.students.student_model import *
 import motor.motor_asyncio
 
 # Connect to DB
