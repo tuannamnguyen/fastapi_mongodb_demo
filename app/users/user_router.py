@@ -26,11 +26,11 @@ async def user_signup(user: UserModel):
 
 
 @user_router.post("/login", status_code=status.HTTP_200_OK)
-async def user_login(user: UserLoginModel) -> bool:
+async def user_login(user: UserLoginModel):
     user = jsonable_encoder(user)
     user_in_db = await db.users.find_one({"email": user["email"]})
     if not user_in_db:
         return False
     if not verify_password(user["password"], user_in_db["password"]):
         return False
-    return True
+    return signJWT(user["email"])
