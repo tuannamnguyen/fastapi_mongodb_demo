@@ -13,8 +13,13 @@ user_router = APIRouter()
 
 
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def create_user(user: UserModel):
+async def user_signup(user: UserModel):
     user = jsonable_encoder(user)
     user.update({"password": get_password_hash(user["password"])})
     await db.users.insert_one(user)
     return bson_to_dict(user)
+
+@user_router.post("/login", status_code=status.HTTP_200_OK)
+async def user_login(user: UserLoginModel):
+    user = jsonable_encoder(user)
+   

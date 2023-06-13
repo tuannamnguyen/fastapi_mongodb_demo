@@ -18,7 +18,7 @@ class UserModel(BaseModel):
         }
 
 
-class UserLoginSchema(BaseModel):
+class UserLoginModel(BaseModel):
     email: EmailStr
     password: str
 
