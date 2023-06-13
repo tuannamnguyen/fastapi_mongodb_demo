@@ -1,4 +1,7 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, EmailStr
+from bson import json_util
+import json
+
 
 class UserModel(BaseModel):
     fullname: str
@@ -26,4 +29,7 @@ class UserLoginSchema(BaseModel):
                 "password": "abc123"
             }
         }
-    
+
+
+def bson_to_dict(data):
+    return json.loads(json_util.dumps(data))
