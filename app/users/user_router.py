@@ -39,3 +39,12 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()])
         )
     expires = timedelta(minutes=30)
     return create_access_token(user_in_db, expires_delta=expires)
+
+@user_router.delete("/{username}", status_code=status.HTTP_200_OK)
+async def delete_user_by_username(username: str) -> dict:
+    user = await db.users.find_one({"username": username})
+    if user is not None:
+        await db.users.delete_one({"username": username})
+        return bson_to_dict(user)
+    raise HTTPException(
+        status_code=404, detail=f"User {username} not found")
