@@ -30,7 +30,15 @@ async def user_login(user: UserLoginModel):
     user = jsonable_encoder(user)
     user_in_db = await db.users.find_one({"email": user["email"]})
     if not user_in_db:
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     if not verify_password(user["password"], user_in_db["password"]):
-        return False
-    return signJWT(user["email"])
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return create_access_token(bson_to_dict(user_in_db), )

@@ -2,6 +2,7 @@ import time
 import jwt
 from decouple import config
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
 
 JWT_SECRET = config("secret")
 JWT_ALGORITHM = config("algorithm")
@@ -35,3 +36,15 @@ def signJWT(user_id: str) -> dict[str, str]:
 def decodeJWT(token: str) -> dict:
     decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     return decoded_token if decoded_token["expires"] >= time.time() else None
+
+# Replace signJWT
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else: 
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"expires": expire})
+    encoded_token = jwt.encode(to_encode, JWT_SECRET, JWT_ALGORITHM) 
+    return {"access_token": encoded_token,"token_type": "bearer"}
+
