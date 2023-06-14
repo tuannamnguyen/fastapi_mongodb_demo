@@ -1,31 +1,18 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from bson import json_util
 import json
 
 
 class UserModel(BaseModel):
     fullname: str
-    email: EmailStr
+    username: str
     password: str
 
     class Config:
         schema_extra = {
             "example": {
                 "fullname": "Nguyen Tuan Nam",
-                "email": "tuannamnguyen290602@gmail.com",
-                "password": "abc123"
-            }
-        }
-
-
-class UserLoginModel(BaseModel):
-    email: EmailStr
-    password: str
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "email": "tuannamnguyen290602@gmail.com",
+                "email": "tuannamnguyen290602",
                 "password": "abc123"
             }
         }
