@@ -17,11 +17,7 @@ def get_password_hash(pwd):
     return pwd_context.hash(pwd)
 
 
-def token_response(token: str) -> dict:
-    return {"access_token": token}
-
-
-def authenticate_user(user_in_db: dict, username: str, password: str) -> bool:
+def authenticate_user(user_in_db: dict, password: str) -> bool:
     if not user_in_db:
         return False
     if not verify_password(password, user_in_db["password"]):

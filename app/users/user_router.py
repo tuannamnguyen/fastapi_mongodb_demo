@@ -30,7 +30,7 @@ async def user_signup(user: UserModel):
 @user_router.post("/login", status_code=status.HTTP_200_OK)
 async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user_in_db = bson_to_dict(await db.users.find_one({"username": form_data.username}))
-    authenticated = authenticate_user(user_in_db, form_data.username, form_data.password)
+    authenticated = authenticate_user(user_in_db, form_data.password)
     if not authenticated:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -39,4 +39,3 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()])
         )
     expires = timedelta(minutes=30)
     return create_access_token(user_in_db, expires_delta=expires)
-  
