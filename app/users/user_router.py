@@ -37,7 +37,7 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()])
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    expires = timedelta(minutes=30)
+    expires = 600
     return create_access_token(user_in_db, expires_delta=expires)
 
 @user_router.delete("/{username}", status_code=status.HTTP_200_OK)

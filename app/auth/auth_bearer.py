@@ -4,11 +4,16 @@ from typing import Annotated
 from jwt import PyJWTError
 
 from app.auth.auth_handler import *
+import motor.motor_asyncio
+
+# Connect to DB
+client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://localhost:27017')
+db = client.demoapp
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
-async def jwt_bearer(token: Annotated[str, Depends(oauth2_scheme)]):
+async def jwt_validator(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -17,7 +22,11 @@ async def jwt_bearer(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         username: str = payload.get("username")
-        if username is None:
+        expire_time: float = payload.get("exp")
+        if username is None or expire_time <= time.time():
             raise credentials_exception
     except PyJWTError:
+        raise credentials_exception
+    user = await db.users.find_one({"username": username})
+    if user is None:
         raise credentials_exception

@@ -1,7 +1,7 @@
 import jwt
 from decouple import config
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+import time
 
 JWT_SECRET = config("secret")
 JWT_ALGORITHM = config("algorithm")
@@ -25,13 +25,13 @@ def authenticate_user(user_in_db: dict, password: str) -> bool:
     return True
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: float | None = None):
     to_encode = {"fullname": data["fullname"],
                  "username": data["username"]}
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = time.time() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"expires": expire.strftime("%M")})
+        expire = time.time() + 900
+    to_encode.update({"exp": expire})
     encoded_token = jwt.encode(to_encode, JWT_SECRET, JWT_ALGORITHM)
     return {"access_token": encoded_token, "token_type": "bearer"}
