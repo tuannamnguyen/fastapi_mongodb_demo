@@ -4,10 +4,13 @@ from typing import Annotated
 from jwt import PyJWTError
 
 from app.auth.auth_handler import *
+from decouple import config
 import motor.motor_asyncio
 
+DB_CONNECTION_STRING = config("db_connection_string")
+
 # Connect to DB
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://localhost:27017')
+client = motor.motor_asyncio.AsyncIOMotorClient(DB_CONNECTION_STRING)
 db = client.demoapp
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")

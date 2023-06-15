@@ -2,10 +2,13 @@ from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
 from app.students.student_model import *
 from app.auth.auth_bearer import jwt_validator
+from decouple import config
 import motor.motor_asyncio
 
+DB_CONNECTION_STRING = config("db_connection_string")
+
 # Connect to DB
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://localhost:27017')
+client = motor.motor_asyncio.AsyncIOMotorClient(DB_CONNECTION_STRING)
 db = client.demoapp
 
 student_router = APIRouter()
