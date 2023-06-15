@@ -4,10 +4,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.users.user_model import *
 from app.auth.auth_handler import *
 from typing import Annotated
+from decouple import config
 import motor.motor_asyncio
 
+DB_CONNECTION_STRING = config("db_connection_string")
+
 # Connect to DB
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb://localhost:27017')
+client = motor.motor_asyncio.AsyncIOMotorClient(DB_CONNECTION_STRING)
 db = client.demoapp
 
 user_router = APIRouter()
@@ -30,15 +33,17 @@ async def user_signup(user: UserModel):
 @user_router.post("/login", status_code=status.HTTP_200_OK)
 async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user_in_db = bson_to_dict(await db.users.find_one({"username": form_data.username}))
-    authenticated = authenticate_user(user_in_db, form_data.password)
-    if not authenticated:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    expires = 600
-    return create_access_token(user_in_db, expires_delta=expires)
+    if user_in_db is not None: 
+        authenticated = authenticate_user(user_in_db, form_data.password)
+        if not authenticated:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        expires = 600
+        return create_access_token(user_in_db, expires_delta=expires)
+    return {"detail": "User not found"}
 
 @user_router.delete("/{username}", status_code=status.HTTP_200_OK)
 async def delete_user_by_username(username: str) -> dict:
