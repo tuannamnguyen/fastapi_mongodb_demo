@@ -1,5 +1,6 @@
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException, Depends, Response
 from fastapi.encoders import jsonable_encoder
+from fastapi_redis_cache import cache_one_hour
 from app.students.student_model import *
 from app.auth.auth_bearer import jwt_validator
 from decouple import config
@@ -15,7 +16,9 @@ student_router = APIRouter()
 
 
 @student_router.get("", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
-async def get_all_students() -> list[dict]:
+@cache_one_hour()
+async def get_all_students(response: Response) -> list[dict]:
+    # response.headers["content-length"] = "200000"
     return [bson_to_dict(student) async for student in db.students.find()]
 
 
@@ -27,6 +30,7 @@ async def add_student(student: StudentModel) -> dict:
 
 
 @student_router.get("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
+@cache_one_hour()
 async def get_student_by_id(student_id: int) -> dict:
     student = await db.students.find_one({"student_id": student_id})
     if student is not None:
