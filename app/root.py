@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from fastapi_redis_cache import FastApiRedisCache
 from app.students.student_router import student_router
 from app.users.user_router import user_router

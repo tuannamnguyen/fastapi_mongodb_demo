@@ -18,7 +18,7 @@ student_router = APIRouter()
 @student_router.get("", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 @cache_one_hour()
 async def get_all_students(response: Response) -> list[dict]:
-    # response.headers["content-length"] = "200000"
+
     return [bson_to_dict(student) async for student in db.students.find()]
 
 
@@ -31,7 +31,7 @@ async def add_student(student: StudentModel) -> dict:
 
 @student_router.get("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 @cache_one_hour()
-async def get_student_by_id(student_id: int) -> dict:
+async def get_student_by_id(student_id: int, response: Response) -> dict:
     student = await db.students.find_one({"student_id": student_id})
     if student is not None:
         return bson_to_dict(student)
