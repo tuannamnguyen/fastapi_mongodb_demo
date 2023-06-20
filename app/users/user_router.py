@@ -33,7 +33,7 @@ async def user_signup(user: UserModel):
 @user_router.post("/login", status_code=status.HTTP_200_OK)
 async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user_in_db = bson_to_dict(await db.users.find_one({"username": form_data.username}))
-    if user_in_db is not None: 
+    if user_in_db is not None:
         authenticated = authenticate_user(user_in_db, form_data.password)
         if not authenticated:
             raise HTTPException(
@@ -44,6 +44,7 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()])
         expires = 600
         return create_access_token(user_in_db, expires_delta=expires)
     return {"detail": "User not found"}
+
 
 @user_router.delete("/{username}", status_code=status.HTTP_200_OK)
 async def delete_user_by_username(username: str) -> dict:
