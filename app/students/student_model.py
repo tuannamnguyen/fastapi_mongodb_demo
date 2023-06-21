@@ -16,7 +16,7 @@ class StudentModel(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "student_id": 1,
+                "student_id": 1002,
                 "fullname": "Andrea Croke",
                 "email": "acrokeo4@123-reg.co.uk",
                 "gender": "Male",
@@ -39,7 +39,7 @@ class UpdateStudentModel(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "fullname": "Andrea Croke",
+                "fullname": "Andrea Croke abcd e",
                 "email": "acrokeo4@123-reg.co.uk",
                 "gender": "Male",
                 "major": "Business Development",
