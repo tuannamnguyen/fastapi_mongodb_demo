@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'fastapi-mongodb-demo'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_4DD8E3AB85824CA5BD1DD47EE73EE5AD }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A6BCEF1EF3441EA96BED0FF2F01B866 }}
