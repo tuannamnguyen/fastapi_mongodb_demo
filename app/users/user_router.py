@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
 from app.users.user_model import *
 from app.auth.auth_handler import *
+from app.auth.auth_bearer import jwt_validator
 from typing import Annotated
 from decouple import config
 import motor.motor_asyncio
@@ -16,7 +17,7 @@ db = client.demoapp
 user_router = APIRouter()
 
 
-@user_router.get("", status_code=status.HTTP_200_OK)
+@user_router.get("", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 async def get_all_users():
     return [bson_to_dict(user) async for user in db.users.find()]
 
@@ -45,7 +46,7 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()])
         return create_access_token(user_in_db, expires_delta=expires)
     return {"detail": "User not found"}
 
-@user_router.delete("/{username}", status_code=status.HTTP_200_OK)
+@user_router.delete("/{username}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 async def delete_user_by_username(username: str) -> dict:
     user = await db.users.find_one({"username": username})
     if user is not None:
