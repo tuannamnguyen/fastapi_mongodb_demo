@@ -46,6 +46,7 @@ async def user_login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()])
         return create_access_token(user_in_db, expires_delta=expires)
     return {"detail": "User not found"}
 
+
 @user_router.delete("/{username}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 async def delete_user_by_username(username: str) -> dict:
     user = await db.users.find_one({"username": username})

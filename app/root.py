@@ -10,6 +10,7 @@ app = FastAPI()
 app.include_router(student_router, prefix="/students", tags=["Students"])
 app.include_router(user_router, prefix="/users", tags=["Users"])
 
+
 @app.on_event("startup")
 def startup():
     redis_cache = FastApiRedisCache()
@@ -18,6 +19,7 @@ def startup():
         prefix="myapi-cache",
         response_header="X-MyAPI-Cache",
     )
+
 
 @app.get("/")
 async def root():

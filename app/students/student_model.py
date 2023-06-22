@@ -1,6 +1,4 @@
 from pydantic import BaseModel, Field, EmailStr
-from bson import json_util
-import json
 
 
 class StudentModel(BaseModel):
@@ -50,4 +48,12 @@ class UpdateStudentModel(BaseModel):
 
 
 def bson_to_dict(data):
-    return json.loads(json_util.dumps(data))
+    return {
+        "id": str(data.get("_id")),
+        "student_id": data.get("student_id"),
+        "fullname": data.get("fullname"),
+        "email": data.get("email"),
+        "major": data.get("major"),
+        "year": data.get("year"),
+        "gpa": data.get("gpa")
+    }
