@@ -1,6 +1,4 @@
 from pydantic import BaseModel
-from bson import json_util
-import json
 
 
 class UserModel(BaseModel):
@@ -18,5 +16,10 @@ class UserModel(BaseModel):
         }
 
 
-def bson_to_dict(data):
-    return json.loads(json_util.dumps(data))
+def bson_to_dict(data) -> dict:
+    return {
+        "id": str(data.get("_id")),
+        "fullname": data.get("fullname"),
+        "username": data.get("username"),
+        "password": data.get("password")
+    }

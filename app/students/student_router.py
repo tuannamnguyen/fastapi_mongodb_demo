@@ -1,5 +1,6 @@
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException, Depends, Response
 from fastapi.encoders import jsonable_encoder
+from fastapi_redis_cache import cache_one_hour
 from app.students.student_model import *
 from app.auth.auth_bearer import jwt_validator
 from decouple import config
@@ -15,7 +16,8 @@ student_router = APIRouter()
 
 
 @student_router.get("", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
-async def get_all_students() -> list[dict]:
+@cache_one_hour()
+async def get_all_students(response: Response) -> list[dict]:
     return [bson_to_dict(student) async for student in db.students.find()]
 
 
