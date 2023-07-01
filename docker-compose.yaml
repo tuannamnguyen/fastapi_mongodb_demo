@@ -7,8 +7,26 @@ services:
       - .env
     depends_on:
       - redis
+      - minio
     
   redis:
     image: redis
     ports: 
       - 6379:6379
+
+  minio:
+    image: minio/minio
+    volumes:
+      - .docker/minio/data:/data
+    ports:
+      - 9000:9000
+      - 9090:9090
+    environment:
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    command: server ~/data --console-address :9090
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
