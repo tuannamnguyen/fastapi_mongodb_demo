@@ -1,11 +1,12 @@
 import random
-from datetime import datetime
 from minio import Minio
 from decouple import config
 
-MINIO_URL = config["minio_url"]
-MINIO_ACCESS_KEY = config["minio_access_key"]
-MINIO_SECRET_KEY = config["minio_secret_key"]
+
+MINIO_URL = config("minio_url")
+MINIO_ACCESS_KEY = config("minio_access_key")
+MINIO_SECRET_KEY = config("minio_secret_key")
+
 
 class MinioHandler():
     def __init__(self):
@@ -39,13 +40,17 @@ class MinioHandler():
 
     def put_object(self, file_data, file_name, content_type):
         try:
-            datetime_prefix = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-            object_name = f"{datetime_prefix}___{file_name}"
-            while self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
+            object_name = f"{file_name}"
+            if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
                 random_prefix = random.randint(1, 1000)
-                object_name = f"{datetime_prefix}___{random_prefix}___{file_name}"
+                object_name = f"{random_prefix}__{file_name}"
             self.client.put_object(bucket_name=self.bucket_name, object_name=object_name,
                                    data=file_data, content_type=content_type, length=-1, part_size=10*1024*1024)
-            url = self.presigned_get_object(bucket_name=self.bucket_name, object_name=object_name)            
+            return {
+                "bucket_name": self.bucket_name,
+                "file_name": object_name,
+                "url": self.minio_url
+            }
         except Exception as e:
             raise Exception(e)
+
