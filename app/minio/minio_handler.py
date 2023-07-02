@@ -1,13 +1,17 @@
 import random
 from datetime import datetime
 from minio import Minio
+from decouple import config
 
+MINIO_URL = config["minio_url"]
+MINIO_ACCESS_KEY = config["minio_access_key"]
+MINIO_SECRET_KEY = config["minio_secret_key"]
 
 class MinioHandler():
     def __init__(self):
-        self.minio_url = "172.22.218.40:9000"
-        self.access_key = "minioadmin"
-        self.secret_key = "minioadmin"
+        self.minio_url = MINIO_URL
+        self.access_key = MINIO_ACCESS_KEY
+        self.secret_key = MINIO_SECRET_KEY
         self.bucket_name = "fastapi-minio"
         self.client = Minio(self.minio_url, access_key=self.access_key,
                             secret_key=self.secret_key, secure=False)
