@@ -27,3 +27,7 @@ async def upload_file_to_minio(file: UploadFile = File(...)):
         content_type=file.content_type
     )
 
+@minio_router.get("/download/{file_name}", status_code=status.HTTP_200_OK)
+def download_file_from_minio(file_name: str):
+    return minio_instance.get_object(file_name)
+

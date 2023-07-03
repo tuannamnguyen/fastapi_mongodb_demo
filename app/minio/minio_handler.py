@@ -1,6 +1,8 @@
 import random
 from minio import Minio
 from decouple import config
+from starlette.responses import StreamingResponse
+from io import BytesIO
 
 
 MINIO_URL = config("minio_url")
@@ -35,22 +37,23 @@ class MinioHandler():
                 bucket_name=bucket_name, object_name=object_name)
             return True
         except Exception as e:
-            print(f'Exception: {e}')
-            return False
+            print(e)
 
     def put_object(self, file_data, file_name, content_type):
-        try:
-            object_name = f"{file_name}"
-            if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
-                random_prefix = random.randint(1, 1000)
-                object_name = f"{random_prefix}__{file_name}"
-            self.client.put_object(bucket_name=self.bucket_name, object_name=object_name,
-                                   data=file_data, content_type=content_type, length=-1, part_size=10*1024*1024)
-            return {
-                "bucket_name": self.bucket_name,
-                "file_name": object_name,
-                "url": self.minio_url
-            }
-        except Exception as e:
-            raise Exception(e)
+        object_name = f"{file_name}"
+        if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
+            random_prefix = random.randint(1, 1000)
+            object_name = f"{random_prefix}__{file_name}"
+        self.client.put_object(bucket_name=self.bucket_name, object_name=object_name,
+                               data=file_data, content_type=content_type, length=-1, part_size=10*1024*1024)
+        return {
+            "bucket_name": self.bucket_name,
+            "file_name": object_name,
+            "url": self.minio_url
+        }
+        
+    def get_object(self, object_name):
+        if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
+            file = self.client.get_object(self.bucket_name, object_name=object_name).read()
+            return StreamingResponse(BytesIO(file))
 
