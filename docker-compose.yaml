@@ -24,7 +24,7 @@ services:
     environment:
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
-    command: server ~/data --console-address :9090
+    command: server ~/data --address 0.0.0.0:9000 --console-address 0.0.0.0:9090
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 30s
