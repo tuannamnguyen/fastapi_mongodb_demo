@@ -41,7 +41,7 @@ class MinioHandler():
 
     def put_object(self, file_data, file_name, content_type):
         object_name = f"{file_name}"
-        if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
+        while self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
             random_prefix = random.randint(1, 1000)
             object_name = f"{random_prefix}__{file_name}"
         self.client.put_object(bucket_name=self.bucket_name, object_name=object_name,
