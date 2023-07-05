@@ -18,9 +18,7 @@ services:
   minio:
     image: minio/minio
     volumes:
-      - type: volume
-        source: /minio/data
-        target: /data
+      - minio-data:/data
     ports:
       - 9000:9000
       - 9090:9090
@@ -28,15 +26,13 @@ services:
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
     command: server ~/data --address 0.0.0.0:9000 --console-address 0.0.0.0:9090
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 30s
-      timeout: 20s
-      retries: 3
+
   
   mongodb:
     image: mongo
     volumes:
-    - type: volume
-      source: mongodb/data
-      target: /data/db
+      - mongodb-data:/data/db
+
+volumes:
+  minio-data:
+  mongodb-data:
