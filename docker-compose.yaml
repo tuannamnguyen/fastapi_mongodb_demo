@@ -8,6 +8,7 @@ services:
     depends_on:
       - redis
       - minio
+      - mongodb
     
   redis:
     image: redis
@@ -17,7 +18,7 @@ services:
   minio:
     image: minio/minio
     volumes:
-      - .docker/minio/data:/data
+      - ~/minio/data:/data
     ports:
       - 9000:9000
       - 9090:9090
@@ -30,3 +31,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+  
+  mongodb:
+    image: mongo
+    volumes:
+    - ~/data:/data/db
