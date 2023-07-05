@@ -18,7 +18,9 @@ services:
   minio:
     image: minio/minio
     volumes:
-      - ~/minio/data:/data
+      - type: volume
+        source: /minio/data
+        target: /data
     ports:
       - 9000:9000
       - 9090:9090
@@ -35,4 +37,6 @@ services:
   mongodb:
     image: mongo
     volumes:
-    - ~/data:/data/db
+    - type: volume
+      source: mongodb/data
+      target: /data/db
