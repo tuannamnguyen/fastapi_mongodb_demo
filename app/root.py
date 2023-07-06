@@ -3,15 +3,27 @@ from fastapi_redis_cache import FastApiRedisCache
 from fastapi.responses import HTMLResponse
 from app.students.student_router import student_router
 from app.users.user_router import user_router
+from app.minio.minio_router import minio_router
 from app.websocket import websocket_router
 from decouple import config
+from starlette.middleware.cors import CORSMiddleware
 
 REDIS_URL = config("redis_url")
 
 app = FastAPI()
 app.include_router(student_router, prefix="/students", tags=["Students"])
 app.include_router(user_router, prefix="/users", tags=["Users"])
+app.include_router(minio_router, tags=["MinIO"])
 app.include_router(websocket_router)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 
 @app.on_event("startup")
