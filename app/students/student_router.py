@@ -1,9 +1,12 @@
 from fastapi import APIRouter, status, HTTPException, Depends, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi_redis_cache import cache_one_hour
-from app.students.student_model import *
+from app.students.student_schema import *
 from app.auth.auth_bearer import jwt_validator
+from app.students.student_model import Student
 from decouple import config
+from umongo import Document
+
 import motor.motor_asyncio
 
 DB_CONNECTION_STRING = config("db_connection_string")
@@ -18,14 +21,15 @@ student_router = APIRouter()
 @student_router.get("", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 @cache_one_hour()
 async def get_all_students(response: Response) -> list[dict]:
-    return [bson_to_dict(student) async for student in db.students.find()]
+    return [student.dump() async for student in Student.find()]
 
 
 @student_router.post("", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_201_CREATED)
-async def add_student(student: StudentModel) -> dict:
-    student = jsonable_encoder(student)
-    await db.students.insert_one(student)
-    return bson_to_dict(student)
+async def add_student(student: StudentSchema) -> dict:
+    student_json = jsonable_encoder(student)
+    # TODO: add ensure index
+    await Student(**student_json).commit()
+    return Student(**student_json).dump()
 
 
 @student_router.get("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
@@ -38,7 +42,7 @@ async def get_student_by_id(student_id: int) -> dict:
 
 
 @student_router.put("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_201_CREATED)
-async def update_student_by_id(student_id: int, student_update_data: UpdateStudentModel) -> dict:
+async def update_student_by_id(student_id: int, student_update_data: UpdateStudentSchema) -> dict:
     student = await db.students.find_one({"student_id": student_id})
     student_update_data = jsonable_encoder(student_update_data)
     if student is not None:
