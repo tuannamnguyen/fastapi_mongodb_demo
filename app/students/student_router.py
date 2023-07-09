@@ -1,18 +1,9 @@
 from fastapi import APIRouter, status, HTTPException, Depends, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi_redis_cache import cache_one_minute
-from app.students.student_schema import *
+from app.students.student_schema import StudentSchema, UpdateStudentSchema
 from app.auth.auth_bearer import jwt_validator
 from app.students.student_model import Student, StudentUpdate
-from decouple import config
-
-import motor.motor_asyncio
-
-DB_CONNECTION_STRING = config("db_connection_string")
-
-# Connect to DB
-client = motor.motor_asyncio.AsyncIOMotorClient(DB_CONNECTION_STRING)
-db = client.demoapp
 
 student_router = APIRouter()
 
@@ -44,7 +35,8 @@ async def get_student_by_id(student_id: int) -> dict:
 async def update_student_by_id(student_id: int, student_update_data: UpdateStudentSchema) -> dict:
     student = await Student.find_one({"student_id": student_id})
     student_update_data = jsonable_encoder(student_update_data)
-    student_update_data = {k: v for k, v in student_update_data.items() if v is not None}
+    student_update_data = {k: v for k,
+                           v in student_update_data.items() if v is not None}
     if student:
         await StudentUpdate.collection.update_one({"student_id": student_id}, {"$set": student_update_data})
         return Student(**student_update_data).dump()
