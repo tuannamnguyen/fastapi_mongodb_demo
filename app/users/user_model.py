@@ -1,25 +1,21 @@
-from pydantic import BaseModel
+from umongo.frameworks import MotorAsyncIOInstance
+from decouple import config
+from umongo import validate, Document, fields
+import motor.motor_asyncio
 
 
-class UserModel(BaseModel):
-    fullname: str
-    username: str
-    password: str
+DB_CONNECTION_STRING = config("db_connection_string")
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "fullname": "Nguyen Tuan Nam",
-                "email": "tuannamnguyen290602",
-                "password": "abc123"
-            }
-        }
+# Connect to DB
+client = motor.motor_asyncio.AsyncIOMotorClient(DB_CONNECTION_STRING)
+db = client['demoapp']
+instance = MotorAsyncIOInstance(db)
 
+@instance.register
+class User(Document):
+    fullname = fields.StringField(required=True)
+    username = fields.StringField(unique=True, required=True)
+    password = fields.StringField(required=True)
 
-def bson_to_dict(data) -> dict:
-    return {
-        "id": str(data.get("_id")),
-        "fullname": data.get("fullname"),
-        "username": data.get("username"),
-        "password": data.get("password")
-    }
+    class Meta:
+        collection_name = "users"
