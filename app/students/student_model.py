@@ -26,3 +26,16 @@ class Student(Document):
     class Meta:
         collection_name = "students"
 
+@instance.register
+class StudentUpdate(Document):
+    fullname = fields.StringField(allow_none=True)
+    email = fields.EmailField(allow_none=True)
+    gender = fields.StringField(validate=validate.Regexp(
+        r"(?:m|M|male|Male|f|F|female|Female|FEMALE|MALE|Non-binary)$"), allow_none=True)
+    major = fields.StringField(allow_none=True)
+    year = fields.IntegerField(validate=validate.Range(min=0, max=4), allow_none=True)
+    gpa = fields.FloatField(validate=validate.Range(min=0, max=4), allow_none=True)
+
+    class Meta:
+        collection_name = "students"
+

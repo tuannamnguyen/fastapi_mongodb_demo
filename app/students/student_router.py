@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi_redis_cache import cache_one_minute
 from app.students.student_schema import *
 from app.auth.auth_bearer import jwt_validator
-from app.students.student_model import Student
+from app.students.student_model import Student, StudentUpdate
 from decouple import config
 
 import motor.motor_asyncio
@@ -34,7 +34,7 @@ async def add_student(student: StudentSchema) -> dict:
 @student_router.get("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 async def get_student_by_id(student_id: int) -> dict:
     student = await Student.find_one({"student_id": student_id})
-    if student is not None:
+    if student:
         return student.dump()
     raise HTTPException(
         status_code=404, detail=f"Student {student_id} not found")
@@ -42,11 +42,12 @@ async def get_student_by_id(student_id: int) -> dict:
 
 @student_router.put("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_201_CREATED)
 async def update_student_by_id(student_id: int, student_update_data: UpdateStudentSchema) -> dict:
-    student = await db.students.find_one({"student_id": student_id})
+    student = await Student.find_one({"student_id": student_id})
     student_update_data = jsonable_encoder(student_update_data)
-    if student is not None:
-        await db.students.update_one({"student_id": student_id}, {"$set": student_update_data})
-        return bson_to_dict(student_update_data)
+    student_update_data = {k: v for k, v in student_update_data.items() if v is not None}
+    if student:
+        await StudentUpdate.collection.update_one({"student_id": student_id}, {"$set": student_update_data})
+        return Student(**student_update_data).dump()
     raise HTTPException(
         status_code=404, detail=f"Student {student_id} not found")
 
@@ -54,7 +55,7 @@ async def update_student_by_id(student_id: int, student_update_data: UpdateStude
 @student_router.delete("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 async def delete_student_by_id(student_id: int) -> dict:
     student = await db.students.find_one({"student_id": student_id})
-    if student is not None:
+    if student:
         await db.students.delete_one({"student_id": student_id})
         return bson_to_dict(student)
     raise HTTPException(
