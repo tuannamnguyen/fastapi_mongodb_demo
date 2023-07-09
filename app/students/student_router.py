@@ -54,9 +54,9 @@ async def update_student_by_id(student_id: int, student_update_data: UpdateStude
 
 @student_router.delete("/{student_id}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 async def delete_student_by_id(student_id: int) -> dict:
-    student = await db.students.find_one({"student_id": student_id})
+    student = await Student.find_one({"student_id": student_id})
     if student:
-        await db.students.delete_one({"student_id": student_id})
-        return bson_to_dict(student)
+        await Student.collection.delete_one({"student_id": student_id})
+        return student.dump()
     raise HTTPException(
         status_code=404, detail=f"Student {student_id} not found")
