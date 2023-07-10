@@ -1,4 +1,4 @@
-import random
+from fastapi import HTTPException
 from minio import Minio
 from decouple import config
 from starlette.responses import StreamingResponse
@@ -43,9 +43,8 @@ class MinioHandler():
 
     def put_object(self, file_data, file_name, content_type):
         object_name = f"{file_name}"
-        while self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
-            random_prefix = random.randint(1, 1000)
-            object_name = f"{random_prefix}__{file_name}"
+        if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
+            raise HTTPException(status_code=409, detail="File already exists")
         self.client.put_object(bucket_name=self.bucket_name, object_name=object_name,
                                data=file_data, content_type=content_type, length=-1, part_size=10*1024*1024)
         return {
