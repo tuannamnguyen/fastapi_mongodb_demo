@@ -23,7 +23,8 @@ class MinioHandler():
     def make_bucket(self) -> str:
         if not self.client.bucket_exists(self.bucket_name):
             self.client.make_bucket(self.bucket_name)
-        return self.bucket_name
+            return self.bucket_name
+        return "Bucket already exists"
 
     def presigned_get_object(self, bucket_name: str, object_name: str):
         # Request URL expired after 7 days
@@ -32,12 +33,10 @@ class MinioHandler():
         return url
 
     def check_file_name_exists(self, bucket_name: str, object_name: str) -> bool:
-        try:
-            self.client.stat_object(
-                bucket_name=bucket_name, object_name=object_name)
+        if self.client.stat_object(
+                bucket_name=bucket_name, object_name=object_name):
             return True
-        except Exception as e:
-            print(e)
+        return False
 
     def put_object(self, file_data, file_name, content_type):
         object_name = f"{file_name}"
@@ -51,9 +50,10 @@ class MinioHandler():
             "file_name": object_name,
             "url": self.minio_url
         }
-        
+
     def get_object(self, object_name):
         if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
-            file = self.client.get_object(self.bucket_name, object_name=object_name).read()
+            file = self.client.get_object(
+                self.bucket_name, object_name=object_name).read()
             return StreamingResponse(BytesIO(file))
-
+        return "File already exists"

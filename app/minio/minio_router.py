@@ -1,19 +1,17 @@
 from io import BytesIO
-from fastapi import File, UploadFile, APIRouter, Depends, status, HTTPException
+from fastapi import File, UploadFile, APIRouter, Depends, status
 from app.minio.minio_handler import MinioHandler
-from app.minio.minio_model import *
+from app.minio.minio_schema import *
 from app.auth.auth_bearer import jwt_validator
-from app.minio.exception import CustomException
+from minio.error import S3Error
 
 
 minio_router = APIRouter()
 
 try:
     minio_instance = MinioHandler()
-except Exception as e:
-    if e.__class__.__name__ == 'MaxRetryError':
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot connect to server")
+except S3Error as e:
+    print("error occurred.", e)
 
 
 @minio_router.post("/upload", response_model=UploadFileResponse, dependencies=[Depends(jwt_validator)], status_code=status.HTTP_201_CREATED)
@@ -30,4 +28,3 @@ async def upload_file_to_minio(file: UploadFile = File(...)):
 @minio_router.get("/download/{file_name}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 def download_file_from_minio(file_name: str):
     return minio_instance.get_object(file_name)
-
