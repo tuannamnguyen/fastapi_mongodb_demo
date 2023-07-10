@@ -25,7 +25,7 @@ class MinioHandler():
         if not self.client.bucket_exists(self.bucket_name):
             self.client.make_bucket(self.bucket_name)
             return self.bucket_name
-        return "Bucket already exists"
+        raise HTTPException(status_code=409, detail="Bucket already exists")
 
     def presigned_get_object(self, bucket_name: str, object_name: str):
         # Request URL expired after 7 days
@@ -58,4 +58,4 @@ class MinioHandler():
             file = self.client.get_object(
                 self.bucket_name, object_name=object_name).read()
             return StreamingResponse(BytesIO(file))
-        return "File already exists"
+        raise HTTPException(status_code=409, detail="File already exists")

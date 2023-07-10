@@ -19,13 +19,20 @@ except ServerError as e:
 async def upload_file_to_minio(file: UploadFile = File(...)):
     data = file.file.read()
     file_name = " ".join(file.filename.strip().split())
-
-    return minio_instance.put_object(
-        file_name=file_name,
-        file_data=BytesIO(data),
-        content_type=file.content_type
-    )
+    try:
+        detail = minio_instance.put_object(
+            file_name=file_name,
+            file_data=BytesIO(data),
+            content_type=file.content_type
+        )
+        return detail
+    except S3Error as e:
+        print("error occurred.", e) 
 
 @minio_router.get("/download/{file_name}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 def download_file_from_minio(file_name: str):
-    return minio_instance.get_object(file_name)
+    try: 
+        detail = minio_instance.get_object(file_name)
+        return detail
+    except S3Error as e:
+        print("error occurred.", e)
