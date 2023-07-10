@@ -3,7 +3,7 @@ from fastapi import File, UploadFile, APIRouter, Depends, status
 from app.minio.minio_handler import MinioHandler
 from app.minio.minio_schema import *
 from app.auth.auth_bearer import jwt_validator
-from minio.error import S3Error
+from minio.error import S3Error, ServerError
 
 
 minio_router = APIRouter()
@@ -11,6 +11,8 @@ minio_router = APIRouter()
 try:
     minio_instance = MinioHandler()
 except S3Error as e:
+    print("error occurred.", e)
+except ServerError as e:
     print("error occurred.", e)
 
 

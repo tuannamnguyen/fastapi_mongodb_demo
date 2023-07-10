@@ -3,6 +3,7 @@ from minio import Minio
 from decouple import config
 from starlette.responses import StreamingResponse
 from io import BytesIO
+from minio.error import S3Error
 
 
 MINIO_URL = config("minio_url")
@@ -33,10 +34,12 @@ class MinioHandler():
         return url
 
     def check_file_name_exists(self, bucket_name: str, object_name: str) -> bool:
-        if self.client.stat_object(
-                bucket_name=bucket_name, object_name=object_name):
+        try:
+            self.client.stat_object(
+                    bucket_name=bucket_name, object_name=object_name)
             return True
-        return False
+        except S3Error as e:
+            return False
 
     def put_object(self, file_data, file_name, content_type):
         object_name = f"{file_name}"
