@@ -44,7 +44,7 @@ class MinioHandler():
     def put_object(self, file_data, file_name, content_type):
         object_name = f"{file_name}"
         if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
-            raise HTTPException(status_code=409, detail="File already exists")
+            raise HTTPException(status_code=409, detail="File already exists. Please rename the file and try again")
         self.client.put_object(bucket_name=self.bucket_name, object_name=object_name,
                                data=file_data, content_type=content_type, length=-1, part_size=10*1024*1024)
         return {
@@ -58,4 +58,4 @@ class MinioHandler():
             file = self.client.get_object(
                 self.bucket_name, object_name=object_name).read()
             return StreamingResponse(BytesIO(file))
-        raise HTTPException(status_code=409, detail="File already exists")
+        raise HTTPException(status_code=404, detail="File not found")
