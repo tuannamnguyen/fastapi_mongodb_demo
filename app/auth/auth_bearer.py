@@ -1,13 +1,16 @@
-from fastapi import HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer
+import time
 from typing import Annotated
+
+import jwt
+import motor.motor_asyncio
+from decouple import config
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jwt import PyJWTError
 
-from app.auth.auth_handler import *
-from decouple import config
-import motor.motor_asyncio
-
 DB_CONNECTION_STRING = config("db_connection_string")
+JWT_SECRET = config("secret")
+JWT_ALGORITHM = config("algorithm")
 
 # Connect to DB
 client = motor.motor_asyncio.AsyncIOMotorClient(DB_CONNECTION_STRING)

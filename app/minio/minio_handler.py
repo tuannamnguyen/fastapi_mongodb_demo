@@ -1,9 +1,10 @@
-import random
-from minio import Minio
-from decouple import config
-from starlette.responses import StreamingResponse
 from io import BytesIO
 
+from decouple import config
+from fastapi import HTTPException
+from minio import Minio
+from minio.error import S3Error
+from starlette.responses import StreamingResponse
 
 MINIO_URL = config("minio_url")
 MINIO_ACCESS_KEY = config("minio_access_key")
@@ -36,14 +37,14 @@ class MinioHandler():
             self.client.stat_object(
                 bucket_name=bucket_name, object_name=object_name)
             return True
-        except Exception as e:
-            print(e)
+        except S3Error:
+            return False
 
     def put_object(self, file_data, file_name, content_type):
         object_name = f"{file_name}"
-        while self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
-            random_prefix = random.randint(1, 1000)
-            object_name = f"{random_prefix}__{file_name}"
+        if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
+            raise HTTPException(
+                status_code=409, detail="File already exists. Please rename the file and try again")
         self.client.put_object(bucket_name=self.bucket_name, object_name=object_name,
                                data=file_data, content_type=content_type, length=-1, part_size=10*1024*1024)
         return {
@@ -51,9 +52,10 @@ class MinioHandler():
             "file_name": object_name,
             "url": self.minio_url
         }
-        
+
     def get_object(self, object_name):
         if self.check_file_name_exists(bucket_name=self.bucket_name, object_name=object_name):
-            file = self.client.get_object(self.bucket_name, object_name=object_name).read()
-            return StreamingResponse(BytesIO(file))
-
+            _file = self.client.get_object(
+                self.bucket_name, object_name=object_name).read()
+            return StreamingResponse(BytesIO(_file))
+        raise HTTPException(status_code=404, detail="File not found")

@@ -1,59 +1,40 @@
-from pydantic import BaseModel, Field, EmailStr
+import motor.motor_asyncio
+from decouple import config
+from umongo import Document, fields, validate
+from umongo.frameworks import MotorAsyncIOInstance
+
+DB_CONNECTION_STRING = config("db_connection_string")
+
+# Connect to DB
+client = motor.motor_asyncio.AsyncIOMotorClient(DB_CONNECTION_STRING)
+db = client['demoapp']
+instance = MotorAsyncIOInstance(db)
 
 
-class StudentModel(BaseModel):
-    student_id: int
-    fullname: str
-    email: EmailStr
-    gender: str = Field(...,
-                        regex='(?:m|M|male|Male|f|F|female|Female|FEMALE|MALE|Non-binary)$')
-    major: str
-    year: int = Field(..., gt=0, lt=4)
-    gpa: float = Field(..., ge=0, le=4)
+@instance.register
+class Student(Document):
+    student_id = fields.IntegerField(unique=True)
+    fullname = fields.StringField()
+    email = fields.EmailField()
+    gender = fields.StringField(validate=validate.Regexp(
+        r"(?:m|M|male|Male|f|F|female|Female|FEMALE|MALE|Non-binary)$"))
+    major = fields.StringField()
+    year = fields.IntegerField(validate=validate.Range(min=0, max=4))
+    gpa = fields.FloatField(validate=validate.Range(min=0, max=4))
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "student_id": 1002,
-                "fullname": "Andrea Croke",
-                "email": "acrokeo4@123-reg.co.uk",
-                "gender": "Male",
-                "major": "Business Development",
-                "year": 1,
-                "gpa": 1.6
-            }
-        }
+    class Meta:
+        collection_name = "students"
 
+@instance.register
+class StudentUpdate(Document):
+    fullname = fields.StringField(allow_none=True)
+    email = fields.EmailField(allow_none=True)
+    gender = fields.StringField(validate=validate.Regexp(
+        r"(?:m|M|male|Male|f|F|female|Female|FEMALE|MALE|Non-binary)$"), allow_none=True)
+    major = fields.StringField(allow_none=True)
+    year = fields.IntegerField(validate=validate.Range(min=0, max=4), allow_none=True)
+    gpa = fields.FloatField(validate=validate.Range(min=0, max=4), allow_none=True)
 
-class UpdateStudentModel(BaseModel):
-    fullname: str | None
-    email: EmailStr | None
-    gender: str | None = Field(
-        regex='(?:m|M|male|Male|f|F|female|Female|FEMALE|MALE|Non-binary)$')
-    major: str | None
-    year: int | None = Field(gt=0, lt=4)
-    gpa: float | None = Field(ge=0, le=4)
+    class Meta:
+        collection_name = "students"
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "fullname": "Andrea Croke abcd e",
-                "email": "acrokeo4@123-reg.co.uk",
-                "gender": "Male",
-                "major": "Business Development",
-                "year": 1,
-                "gpa": 1.6
-            }
-        }
-
-
-def bson_to_dict(data):
-    return {
-        "id": str(data.get("_id")),
-        "student_id": data.get("student_id"),
-        "fullname": data.get("fullname"),
-        "email": data.get("email"),
-        "major": data.get("major"),
-        "year": data.get("year"),
-        "gpa": data.get("gpa")
-    }

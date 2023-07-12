@@ -1,7 +1,8 @@
+import time
+
 import jwt
 from decouple import config
 from passlib.context import CryptContext
-import time
 
 JWT_SECRET = config("secret")
 JWT_ALGORITHM = config("algorithm")

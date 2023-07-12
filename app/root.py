@@ -1,12 +1,13 @@
+from decouple import config
 from fastapi import FastAPI
-from fastapi_redis_cache import FastApiRedisCache
 from fastapi.responses import HTMLResponse
+from fastapi_redis_cache import FastApiRedisCache
+from starlette.middleware.cors import CORSMiddleware
+
+from app.minio.minio_router import minio_router
 from app.students.student_router import student_router
 from app.users.user_router import user_router
-from app.minio.minio_router import minio_router
 from app.websocket import websocket_router
-from decouple import config
-from starlette.middleware.cors import CORSMiddleware
 
 REDIS_URL = config("redis_url")
 
