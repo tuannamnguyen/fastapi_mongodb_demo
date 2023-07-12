@@ -1,18 +1,19 @@
 from io import BytesIO
-from fastapi import File, UploadFile, APIRouter, Depends, status
-from app.minio.minio_handler import MinioHandler
-from app.auth.auth_bearer import jwt_validator
+
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from minio.error import S3Error, ServerError
 
+from app.auth.auth_bearer import jwt_validator
+from app.minio.minio_handler import MinioHandler
 
 minio_router = APIRouter()
 
 try:
     minio_instance = MinioHandler()
 except S3Error as e:
-    print("error occurred.", e)
+    print(e)
 except ServerError as e:
-    print("error occurred.", e)
+    print(e)
 
 
 @minio_router.post("/upload", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_201_CREATED)
@@ -27,12 +28,13 @@ async def upload_file_to_minio(file: UploadFile = File(...)):
         )
         return detail
     except S3Error as e:
-        print("error occurred.", e) 
+        print(e)
+
 
 @minio_router.get("/download/{file_name}", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
 def download_file_from_minio(file_name: str):
-    try: 
+    try:
         detail = minio_instance.get_object(file_name)
         return detail
     except S3Error as e:
-        print("error occurred.", e)
+        print(e)
