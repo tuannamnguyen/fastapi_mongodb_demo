@@ -1,9 +1,10 @@
-from fastapi import APIRouter, status, HTTPException, Depends, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi_redis_cache import cache_one_minute
-from app.students.student_schema import StudentSchema, UpdateStudentSchema
+
 from app.auth.auth_bearer import jwt_validator
 from app.students.student_model import Student, StudentUpdate
+from app.students.student_schema import StudentSchema, UpdateStudentSchema
 
 student_router = APIRouter()
 

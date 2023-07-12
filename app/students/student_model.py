@@ -1,8 +1,7 @@
-from umongo.frameworks import MotorAsyncIOInstance
-from decouple import config
-from umongo import validate, Document, fields
 import motor.motor_asyncio
-
+from decouple import config
+from umongo import Document, fields, validate
+from umongo.frameworks import MotorAsyncIOInstance
 
 DB_CONNECTION_STRING = config("db_connection_string")
 

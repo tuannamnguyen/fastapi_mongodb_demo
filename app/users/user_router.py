@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
-from app.users.user_schema import *
-from app.auth.auth_handler import *
+from app.users.user_schema import UserSchema
+from app.auth.auth_handler import get_password_hash, authenticate_user, create_access_token
 from app.auth.auth_bearer import jwt_validator
 from app.users.user_model import User
 from typing import Annotated
