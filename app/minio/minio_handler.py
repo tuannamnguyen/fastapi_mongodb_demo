@@ -59,3 +59,9 @@ class MinioHandler():
                 self.bucket_name, object_name=object_name).read()
             return StreamingResponse(BytesIO(_file))
         raise HTTPException(status_code=404, detail="File not found")
+    
+    def list_objects(self):
+        if not self.client.bucket_exists(self.bucket_name):
+            raise HTTPException(status_code=404, detail="Bucket not found")
+        return self.client.list_objects(self.bucket_name)
+

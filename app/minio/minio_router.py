@@ -38,3 +38,10 @@ def download_file_from_minio(file_name: str):
         return detail
     except S3Error as e:
         print(e)
+
+@minio_router.get("/all", dependencies=[Depends(jwt_validator)], status_code=status.HTTP_200_OK)
+def list_all_files():
+    try:
+        return [object for object in minio_instance.list_objects()]
+    except S3Error as e:
+        print(e)

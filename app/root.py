@@ -14,7 +14,7 @@ REDIS_URL = config("redis_url")
 app = FastAPI()
 app.include_router(student_router, prefix="/students", tags=["Students"])
 app.include_router(user_router, prefix="/users", tags=["Users"])
-app.include_router(minio_router, tags=["MinIO"])
+app.include_router(minio_router, prefix="/minio", tags=["MinIO"])
 app.include_router(websocket_router)
 
 
